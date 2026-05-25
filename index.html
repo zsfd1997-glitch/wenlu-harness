@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>文炉</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap");
     :root {
       --bg: #f6faff;
       --panel: rgba(255, 255, 255, .82);
@@ -31,7 +30,7 @@
         radial-gradient(circle at 80% 10%, rgba(8, 174, 202, .16), transparent 28%),
         radial-gradient(circle at 12% 92%, rgba(48, 108, 255, .1), transparent 28%),
         linear-gradient(180deg, #fcfeff, var(--bg));
-      font: 15px/1.55 "Space Grotesk", "Noto Sans SC", sans-serif;
+      font: 15px/1.55 "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
     }
     body::before {
       content: "";
@@ -187,7 +186,7 @@
       color: var(--text);
       outline: none;
       resize: none;
-      font: 500 21px/1.85 "Noto Sans SC", sans-serif;
+      font: 500 21px/1.85 "PingFang SC", "Microsoft YaHei", sans-serif;
       letter-spacing: 0;
     }
     #draft::placeholder { color: rgba(12,23,32,.34); }
@@ -253,7 +252,7 @@
       overflow: auto;
       max-height: 52vh;
       color: #20313b;
-      font: 13px/1.7 "Noto Sans SC", sans-serif;
+      font: 13px/1.7 "PingFang SC", "Microsoft YaHei", sans-serif;
     }
     dialog {
       width: min(760px, calc(100vw - 28px));
@@ -326,6 +325,8 @@
         <span class="pill" id="gitState">Git 未连接</span>
       </div>
       <div class="top-actions">
+        <button class="btn" id="newBtn">新建</button>
+        <button class="btn" id="downloadBtn">下载</button>
         <button class="btn" id="openSettings">设置</button>
         <button class="btn primary" id="gitSaveBtn">Git 保存</button>
       </div>
@@ -381,8 +382,8 @@
       <label>自动保存
         <select id="gitInterval">
           <option value="0">关闭</option>
-          <option value="60">60 秒</option>
-          <option value="180" selected>3 分钟</option>
+          <option value="60" selected>60 秒</option>
+          <option value="180">3 分钟</option>
           <option value="300">5 分钟</option>
         </select>
       </label>
@@ -415,6 +416,8 @@
 
     openSettings.onclick = () => settingsDialog.showModal();
     closeSettings.onclick = () => settingsDialog.close();
+    newBtn.onclick = () => newDraft();
+    downloadBtn.onclick = () => downloadMarkdown();
     provider.onchange = () => { model.value = defaults[provider.value] || model.value; queueSave(); };
     for (const id of fields) {
       document.getElementById(id).addEventListener("input", queueSave);
@@ -433,6 +436,20 @@
       copyBtn.textContent = "已复制";
       setTimeout(() => copyBtn.textContent = "复制", 1000);
     };
+    document.addEventListener("keydown", (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        saveToGit(true);
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key === ",") {
+        event.preventDefault();
+        settingsDialog.showModal();
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        runAssist("review");
+      }
+    });
 
     function loadState() {
       const raw = localStorage.getItem(storageKey);
@@ -487,6 +504,33 @@
       return `# ${docTitle.value || "未命名章节"}\n\n${draft.value}\n\n---\n保存时间：${new Date().toISOString()}\n`;
     }
 
+    function slugTitle() {
+      return (docTitle.value || "draft").trim().replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-").slice(0, 60) || "draft";
+    }
+
+    function downloadMarkdown() {
+      const blob = new Blob([buildMarkdown()], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${slugTitle()}.md`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function newDraft() {
+      if (draft.value.trim() && !confirm("清空当前正文？")) return;
+      docTitle.value = "未命名章节";
+      draft.value = "";
+      score.textContent = "--";
+      decision.textContent = "未审稿";
+      runMeta.textContent = "未调用模型";
+      output.textContent = "结果显示在这里。正文不会被覆盖。";
+      ideas.innerHTML = `<div class="item idea"><strong>待命</strong><br>先写，不打断。</div>`;
+      dirtyForGit = true;
+      queueSave();
+    }
+
     async function saveToGit(manual) {
       const token = gitToken.value.trim();
       if (!token) {
@@ -532,6 +576,11 @@
       const cfg = map[mode];
       output.textContent = "Running...";
       runMeta.textContent = "请求 Harness";
+      if (provider.value === "mock") {
+        renderAssist(localMockResult(mode), mode);
+        runMeta.textContent = "本地 Harness · mock";
+        return;
+      }
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 75000);
       try {
