@@ -7,20 +7,20 @@
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap");
     :root {
-      --bg: #f5f8fb;
+      --bg: #f6faff;
       --panel: rgba(255, 255, 255, .82);
-      --panel-strong: rgba(255, 255, 255, .96);
-      --line: rgba(19, 126, 149, .18);
-      --line-strong: rgba(19, 126, 149, .38);
-      --text: #0d1820;
-      --muted: #637482;
-      --dim: #8ea0aa;
-      --cyan: #0bb6d6;
-      --green: #178a5b;
-      --red: #c94355;
-      --amber: #a56a00;
-      --violet: #6554d9;
-      --shadow: 0 24px 70px rgba(25, 52, 71, .13);
+      --panel-solid: #ffffff;
+      --line: rgba(23, 112, 136, .18);
+      --line-hot: rgba(7, 176, 212, .42);
+      --text: #0c1720;
+      --muted: #617482;
+      --dim: #91a2ad;
+      --cyan: #08aeca;
+      --blue: #306cff;
+      --green: #16885a;
+      --red: #c9485d;
+      --amber: #a96f00;
+      --shadow: 0 24px 80px rgba(30, 70, 96, .13);
     }
     * { box-sizing: border-box; }
     html, body { min-height: 100%; }
@@ -28,11 +28,10 @@
       margin: 0;
       color: var(--text);
       background:
-        radial-gradient(circle at 72% 12%, rgba(11, 182, 214, .16), transparent 28%),
-        radial-gradient(circle at 16% 88%, rgba(101, 84, 217, .1), transparent 30%),
-        linear-gradient(180deg, #fbfdff, var(--bg));
+        radial-gradient(circle at 80% 10%, rgba(8, 174, 202, .16), transparent 28%),
+        radial-gradient(circle at 12% 92%, rgba(48, 108, 255, .1), transparent 28%),
+        linear-gradient(180deg, #fcfeff, var(--bg));
       font: 15px/1.55 "Space Grotesk", "Noto Sans SC", sans-serif;
-      overflow-x: hidden;
     }
     body::before {
       content: "";
@@ -40,62 +39,242 @@
       inset: 0;
       pointer-events: none;
       background:
-        linear-gradient(rgba(19, 126, 149, .07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(19, 126, 149, .055) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: linear-gradient(180deg, rgba(0,0,0,.8), rgba(0,0,0,.22));
+        linear-gradient(rgba(23,112,136,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23,112,136,.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.18));
     }
     button, input, textarea, select { font: inherit; }
     button { cursor: pointer; }
-    h1, h2, h3, p { margin: 0; }
+    h1, h2, p { margin: 0; }
     .app {
       position: relative;
       display: grid;
-      grid-template-columns: 250px minmax(480px, 1fr) 330px;
-      gap: 16px;
+      grid-template-rows: auto minmax(0, 1fr);
       min-height: 100vh;
-      padding: 16px;
+      gap: 14px;
+      padding: 14px;
     }
-    .left, .right {
-      align-self: start;
-      position: sticky;
-      top: 16px;
+    .top {
       display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
       gap: 12px;
-      max-height: calc(100vh - 32px);
-      overflow: auto;
-    }
-    .brand, .card, .editor {
+      padding: 12px;
       border: 1px solid var(--line);
+      border-radius: 24px;
       background: var(--panel);
       box-shadow: var(--shadow);
       backdrop-filter: blur(18px);
     }
     .brand {
-      padding: 16px;
-      display: grid;
-      gap: 14px;
-    }
-    .logo {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 10px;
+      min-width: 120px;
     }
-    .logo h1 {
-      font-size: 26px;
+    .mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(8,174,202,.2), rgba(48,108,255,.14));
+      border: 1px solid var(--line-hot);
+      color: var(--cyan);
+      font-weight: 900;
+    }
+    .brand h1 { font-size: 21px; letter-spacing: 0; }
+    .status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .pill {
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .pill.hot { color: var(--cyan); border-color: var(--line-hot); }
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .btn {
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.78);
+      color: var(--text);
+      font-weight: 800;
+      padding: 0 14px;
+    }
+    .btn.primary {
+      border-color: var(--line-hot);
+      background: linear-gradient(135deg, rgba(8,174,202,.2), rgba(48,108,255,.12));
+    }
+    .btn:hover { border-color: var(--cyan); transform: translateY(-1px); }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 14px;
+      min-height: 0;
+    }
+    .writer, .side, dialog {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+    .writer {
+      min-height: calc(100vh - 104px);
+      border-radius: 28px;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+    .title-row {
+      padding: 22px 28px 8px;
+      border-bottom: 1px solid rgba(23,112,136,.1);
+    }
+    #docTitle {
+      width: 100%;
+      height: 56px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      outline: none;
+      font-size: clamp(30px, 4vw, 58px);
+      font-weight: 900;
       letter-spacing: 0;
     }
-    .dot {
-      width: 13px;
-      height: 13px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 22px var(--green);
+    .editor {
+      position: relative;
+      min-height: 0;
+      background:
+        linear-gradient(90deg, rgba(8,174,202,.06), transparent 22%, transparent 78%, rgba(48,108,255,.055)),
+        linear-gradient(rgba(23,112,136,.045) 1px, transparent 1px);
+      background-size: auto, 100% 34px;
     }
-    .tagline {
+    .editor::after {
+      content: "WRITE";
+      position: absolute;
+      right: 26px;
+      bottom: 8px;
+      color: rgba(8,174,202,.055);
+      font-size: 82px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+    #draft {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 560px;
+      padding: clamp(26px, 4vw, 52px);
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      font: 500 21px/1.85 "Noto Sans SC", sans-serif;
+      letter-spacing: 0;
+    }
+    #draft::placeholder { color: rgba(12,23,32,.34); }
+    .commands {
+      display: grid;
+      grid-template-columns: 1.2fr repeat(3, 1fr);
+      gap: 10px;
+      padding: 14px;
+      border-top: 1px solid rgba(23,112,136,.1);
+    }
+    .side {
+      min-height: calc(100vh - 104px);
+      border-radius: 28px;
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 12px;
+      overflow: auto;
+    }
+    .card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,.66);
+    }
+    .card h2 { font-size: 16px; }
+    .metric {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .score {
+      width: 76px;
+      height: 76px;
+      display: grid;
+      place-items: center;
+      border-radius: 22px;
+      border: 1px solid rgba(22,136,90,.42);
+      background: rgba(22,136,90,.08);
+      color: var(--green);
+      font-size: 25px;
+      font-weight: 900;
+    }
+    .list { display: grid; gap: 8px; }
+    .item {
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.68);
       color: var(--muted);
       font-size: 13px;
+    }
+    .item strong { color: var(--text); }
+    .item.good { border-color: rgba(22,136,90,.34); }
+    .item.bad { border-color: rgba(201,72,93,.38); }
+    .item.idea { border-color: rgba(8,174,202,.34); }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      overflow: auto;
+      max-height: 52vh;
+      color: #20313b;
+      font: 13px/1.7 "Noto Sans SC", sans-serif;
+    }
+    dialog {
+      width: min(760px, calc(100vw - 28px));
+      border-radius: 24px;
+      padding: 0;
+      color: var(--text);
+    }
+    dialog::backdrop { background: rgba(15, 29, 40, .22); backdrop-filter: blur(6px); }
+    .settings-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding: 16px;
     }
     label {
       display: grid;
@@ -108,338 +287,144 @@
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 12px;
-      background: rgba(255, 255, 255, .78);
+      background: rgba(255,255,255,.82);
       color: var(--text);
       outline: none;
     }
-    input, select {
-      height: 38px;
-      padding: 0 11px;
-    }
-    textarea {
-      min-height: 90px;
-      padding: 11px;
-      resize: vertical;
-    }
+    input, select { height: 38px; padding: 0 11px; }
+    textarea { min-height: 92px; padding: 10px; resize: vertical; }
     input:focus, select:focus, textarea:focus {
       border-color: var(--cyan);
-      box-shadow: 0 0 0 3px rgba(11, 182, 214, .13);
+      box-shadow: 0 0 0 3px rgba(8,174,202,.13);
     }
-    .field-stack {
-      display: grid;
-      gap: 10px;
-    }
-    .mini {
-      color: var(--dim);
-      font-size: 12px;
-    }
-    .main {
-      display: grid;
-      grid-template-rows: auto minmax(560px, 1fr) auto;
-      gap: 14px;
-      min-height: calc(100vh - 32px);
-    }
-    .topbar {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-    }
-    #docTitle {
-      height: 54px;
-      padding: 0 2px;
-      border: 0;
-      background: transparent;
-      color: var(--text);
-      font-size: clamp(30px, 4.2vw, 58px);
-      font-weight: 900;
-      letter-spacing: 0;
-    }
-    #docTitle:focus { box-shadow: none; }
-    .status {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-    .pill {
-      min-height: 34px;
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 0 12px;
-      background: rgba(255, 255, 255, .8);
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-    .pill.hot {
-      color: var(--cyan);
-      border-color: var(--line-strong);
-    }
-    .editor {
-      position: relative;
-      overflow: hidden;
-      border-radius: 24px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(243, 248, 252, .98));
-    }
-    .editor::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(90deg, rgba(11, 182, 214, .09), transparent 18%, transparent 82%, rgba(101, 84, 217, .08)),
-        linear-gradient(rgba(19, 126, 149, .06) 1px, transparent 1px);
-      background-size: auto, 100% 32px;
-    }
-    .editor::after {
-      content: "WRITE";
-      position: absolute;
-      right: 28px;
-      bottom: 18px;
-      color: rgba(11, 182, 214, .06);
-      font-size: 92px;
-      font-weight: 900;
-      letter-spacing: 0;
-      pointer-events: none;
-    }
-    #draft {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: 100%;
-      min-height: 560px;
-      border: 0;
-      border-radius: 0;
-      padding: clamp(26px, 4vw, 54px);
-      background: transparent;
-      color: var(--text);
-      resize: none;
-      font: 500 21px/1.85 "Noto Sans SC", sans-serif;
-      letter-spacing: 0;
-    }
-    #draft::placeholder { color: rgba(13, 24, 32, .34); }
-    #draft:focus { box-shadow: none; }
-    .actions {
-      display: grid;
-      grid-template-columns: 1.2fr repeat(3, 1fr);
-      gap: 10px;
-    }
-    .btn {
-      height: 46px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, .86);
-      color: var(--text);
-      font-weight: 800;
-    }
-    .btn.primary {
-      border-color: rgba(11, 182, 214, .58);
-      background: linear-gradient(135deg, rgba(11, 182, 214, .18), rgba(101, 84, 217, .12));
-      color: #07151c;
-      box-shadow: 0 0 34px rgba(11, 182, 214, .12);
-    }
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: var(--cyan);
-    }
-    .card {
-      border-radius: 20px;
-      padding: 16px;
-      display: grid;
-      gap: 12px;
-    }
-    .card h2 {
-      font-size: 17px;
-      letter-spacing: 0;
-    }
-    .metric {
-      display: grid;
-      grid-template-columns: 82px 1fr;
-      gap: 14px;
-      align-items: center;
-    }
-    .score {
-      width: 82px;
-      height: 82px;
-      border-radius: 24px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(23, 138, 91, .5);
-      color: var(--green);
-      background: rgba(23, 138, 91, .08);
-      box-shadow: inset 0 0 34px rgba(23, 138, 91, .08);
-      font-size: 26px;
-      font-weight: 900;
-    }
-    .list {
-      display: grid;
-      gap: 8px;
-    }
-    .item {
-      padding: 10px 11px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, .68);
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .item strong { color: var(--text); }
-    .item.good { border-color: rgba(23, 138, 91, .35); }
-    .item.bad { border-color: rgba(201, 67, 85, .42); }
-    .item.idea { border-color: rgba(11, 182, 214, .35); }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-      overflow: auto;
-      max-height: 360px;
-      color: #20313b;
-      font: 13px/1.7 "Noto Sans SC", sans-serif;
-    }
+    .span2 { grid-column: 1 / -1; }
+    .mini { color: var(--dim); font-size: 12px; }
     .git-ok { color: var(--green); }
     .git-warn { color: var(--amber); }
     .git-bad { color: var(--red); }
-    @media (max-width: 1120px) {
-      .app { grid-template-columns: 1fr; }
-      .left, .right { position: static; max-height: none; }
-      .actions { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 1040px) {
+      .workspace { grid-template-columns: 1fr; }
+      .writer, .side { min-height: auto; }
+      .side { grid-template-rows: auto; }
     }
-    @media (max-width: 620px) {
+    @media (max-width: 680px) {
       .app { padding: 10px; }
-      .topbar { grid-template-columns: 1fr; }
-      .status { justify-content: flex-start; }
-      .actions { grid-template-columns: 1fr; }
-      #draft { font-size: 18px; padding: 24px; }
+      .top { grid-template-columns: 1fr; }
+      .status, .top-actions { justify-content: flex-start; }
+      .commands, .settings-grid { grid-template-columns: 1fr; }
+      #draft { min-height: 480px; font-size: 18px; padding: 24px; }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <aside class="left">
-      <section class="brand">
-        <div class="logo">
-          <h1>文炉</h1>
-          <span class="dot"></span>
+    <header class="top">
+      <div class="brand"><div class="mark">文</div><h1>文炉</h1></div>
+      <div class="status">
+        <span class="pill hot" id="wordCount">0 字</span>
+        <span class="pill" id="saveState">本机已保存</span>
+        <span class="pill" id="gitState">Git 未连接</span>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="openSettings">设置</button>
+        <button class="btn primary" id="gitSaveBtn">Git 保存</button>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <main class="writer">
+        <div class="title-row">
+          <input id="docTitle" value="未命名章节" aria-label="标题">
         </div>
-        <p class="tagline">写作优先。AI 只在需要时介入。</p>
-      </section>
+        <section class="editor">
+          <textarea id="draft" spellcheck="false" placeholder="直接写。需要时再点灵感、审稿、因果。"></textarea>
+        </section>
+        <nav class="commands">
+          <button class="btn primary" id="inspireBtn">灵感</button>
+          <button class="btn" id="reviewBtn">审稿</button>
+          <button class="btn" id="causalityBtn">因果</button>
+          <button class="btn" id="copyBtn">复制</button>
+        </nav>
+      </main>
 
-      <section class="card field-stack">
-        <h2>Git</h2>
-        <label>Owner <input id="gitOwner" value="zsfd1997-glitch"></label>
-        <label>Repo <input id="gitRepo" value="wenlu-writing-vault"></label>
-        <label>Path <input id="gitPath" value="drafts/current.md"></label>
-        <label>Token <input id="gitToken" type="password" placeholder="Contents read/write"></label>
-        <label>Interval
-          <select id="gitInterval">
-            <option value="0">Off</option>
-            <option value="60">60s</option>
-            <option value="180" selected>3m</option>
-            <option value="300">5m</option>
-          </select>
-        </label>
-        <button class="btn" id="gitSaveBtn">Git Save</button>
-        <p class="mini"><span id="gitState" class="git-warn">Git 未连接</span> · <span id="lastGit">未提交</span></p>
-      </section>
-
-      <section class="card field-stack">
-        <h2>Context</h2>
-        <label>目标 <textarea id="goal">写一段低 AI 味、因果明确、能继续推进长篇章节的中文正文。</textarea></label>
-        <label>设定 <textarea id="contextText">主角当前称谓：刘烬。当前主场锁在铁炉镇及近郊。旧口径资产不得作为依据。AI 产物只能是候选，不能覆盖正稿。</textarea></label>
-        <label>Provider
-          <select id="provider">
-            <option value="mock">mock</option>
-            <option value="openrouter">OpenRouter</option>
-            <option value="xai">xAI / Grok</option>
-            <option value="deepseek">DeepSeek</option>
-            <option value="openai">OpenAI</option>
-          </select>
-        </label>
-        <label>Model <input id="model" value="harness-mock-cn"></label>
-        <label>API Key <input id="apiKey" type="password" placeholder="只用于本次请求"></label>
-      </section>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <input id="docTitle" value="未命名章节" aria-label="标题">
-        <div class="status">
-          <span class="pill hot" id="wordCount">0 字</span>
-          <span class="pill" id="saveState">本机已保存</span>
-          <span class="pill" id="focusState">WRITE</span>
-        </div>
-      </header>
-
-      <section class="editor">
-        <textarea id="draft" spellcheck="false" placeholder="直接写。需要时再点灵感、审稿、因果。"></textarea>
-      </section>
-
-      <nav class="actions">
-        <button class="btn primary" id="inspireBtn">灵感</button>
-        <button class="btn" id="reviewBtn">审稿</button>
-        <button class="btn" id="causalityBtn">因果</button>
-        <button class="btn" id="copyBtn">复制</button>
-      </nav>
-    </main>
-
-    <aside class="right">
-      <section class="card">
-        <h2>Signal</h2>
-        <div class="list" id="ideas">
-          <div class="item idea"><strong>待命</strong><br>先写，不打断。</div>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>Harness</h2>
-        <div class="metric">
-          <div class="score" id="score">--</div>
-          <div>
-            <p id="decision">未审稿</p>
-            <p class="mini" id="runMeta">未调用模型</p>
+      <aside class="side">
+        <section class="card">
+          <h2>Signal</h2>
+          <div class="list" id="ideas"><div class="item idea"><strong>待命</strong><br>先写，不打断。</div></div>
+        </section>
+        <section class="card">
+          <h2>Harness</h2>
+          <div class="metric">
+            <div class="score" id="score">--</div>
+            <div><p id="decision">未审稿</p><p class="mini" id="runMeta">未调用模型</p></div>
           </div>
-        </div>
-        <div class="list" id="gates"></div>
-      </section>
-
-      <section class="card">
-        <h2>Output</h2>
-        <pre id="output">结果显示在这里。正文不会被覆盖。</pre>
-      </section>
-    </aside>
+          <div class="list" id="gates"></div>
+        </section>
+        <section class="card">
+          <h2>Output</h2>
+          <pre id="output">结果显示在这里。正文不会被覆盖。</pre>
+        </section>
+      </aside>
+    </section>
   </div>
+
+  <dialog id="settingsDialog">
+    <div class="settings-head">
+      <h2>设置</h2>
+      <button class="btn" id="closeSettings">关闭</button>
+    </div>
+    <div class="settings-grid">
+      <label>Owner <input id="gitOwner" value="zsfd1997-glitch"></label>
+      <label>Repo <input id="gitRepo" value="wenlu-writing-vault"></label>
+      <label>Path <input id="gitPath" value="drafts/current.md"></label>
+      <label>GitHub Token <input id="gitToken" type="password" placeholder="Contents read/write"></label>
+      <label>自动保存
+        <select id="gitInterval">
+          <option value="0">关闭</option>
+          <option value="60">60 秒</option>
+          <option value="180" selected>3 分钟</option>
+          <option value="300">5 分钟</option>
+        </select>
+      </label>
+      <label>Provider
+        <select id="provider">
+          <option value="mock">mock</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="xai">xAI / Grok</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="openai">OpenAI</option>
+        </select>
+      </label>
+      <label>Model <input id="model" value="harness-mock-cn"></label>
+      <label>API Key <input id="apiKey" type="password" placeholder="只用于本次请求"></label>
+      <label class="span2">目标 <textarea id="goal">写一段低 AI 味、因果明确、能继续推进长篇章节的中文正文。</textarea></label>
+      <label class="span2">设定 <textarea id="contextText">主角当前称谓：刘烬。当前主场锁在铁炉镇及近郊。旧口径资产不得作为依据。AI 产物只能是候选，不能覆盖正稿。</textarea></label>
+      <button class="btn primary span2" id="gitSaveInDialog">Git 保存</button>
+      <p class="mini span2"><span id="lastGit">未提交</span></p>
+    </div>
+  </dialog>
 
   <script>
     const endpoint = "https://ybpknmzpxzaiggnmbjqj.supabase.co/functions/v1/wenlu-harness";
     const defaults = { mock: "harness-mock-cn", openrouter: "x-ai/grok-4.1-fast", xai: "grok-4.3", deepseek: "deepseek-chat", openai: "gpt-5.1" };
-    const storageKey = "wenlu.editor.tech.v1";
+    const storageKey = "wenlu.editor.final.v1";
     const fields = ["docTitle", "draft", "goal", "contextText", "provider", "model", "gitOwner", "gitRepo", "gitPath", "gitInterval"];
     let saveTimer = null;
     let gitTimer = null;
     let dirtyForGit = false;
 
-    provider.onchange = () => {
-      model.value = defaults[provider.value] || model.value;
-      queueSave();
-    };
-
+    openSettings.onclick = () => settingsDialog.showModal();
+    closeSettings.onclick = () => settingsDialog.close();
+    provider.onchange = () => { model.value = defaults[provider.value] || model.value; queueSave(); };
     for (const id of fields) {
       document.getElementById(id).addEventListener("input", queueSave);
       document.getElementById(id).addEventListener("change", queueSave);
     }
-    draft.addEventListener("input", () => {
-      dirtyForGit = true;
-      updateStats();
-    });
-    gitToken.addEventListener("input", () => {
-      sessionStorage.setItem("wenlu.githubToken", gitToken.value);
-      updateGitState();
-    });
+    draft.addEventListener("input", () => { dirtyForGit = true; updateStats(); });
+    gitToken.addEventListener("input", () => { sessionStorage.setItem("wenlu.githubToken", gitToken.value); updateGitState(); });
     gitInterval.addEventListener("change", configureGitTimer);
     gitSaveBtn.onclick = () => saveToGit(true);
+    gitSaveInDialog.onclick = () => saveToGit(true);
     inspireBtn.onclick = () => runAssist("inspire");
     reviewBtn.onclick = () => runAssist("review");
     causalityBtn.onclick = () => runAssist("causality");
@@ -453,9 +438,7 @@
       const raw = localStorage.getItem(storageKey);
       if (raw) {
         const state = JSON.parse(raw);
-        for (const id of fields) {
-          if (state[id] !== undefined) document.getElementById(id).value = state[id];
-        }
+        for (const id of fields) if (state[id] !== undefined) document.getElementById(id).value = state[id];
       }
       gitToken.value = sessionStorage.getItem("wenlu.githubToken") || "";
       updateStats();
@@ -466,7 +449,7 @@
     function queueSave() {
       clearTimeout(saveTimer);
       saveState.textContent = "保存中";
-      saveTimer = setTimeout(saveLocal, 280);
+      saveTimer = setTimeout(saveLocal, 260);
     }
 
     function saveLocal() {
@@ -487,10 +470,10 @@
     function updateGitState() {
       if (!gitToken.value.trim()) {
         gitState.textContent = "Git 未连接";
-        gitState.className = "git-warn";
+        gitState.className = "pill";
       } else {
         gitState.textContent = dirtyForGit ? "Git 待提交" : "Git 已同步";
-        gitState.className = dirtyForGit ? "git-warn" : "git-ok";
+        gitState.className = dirtyForGit ? "pill git-warn" : "pill git-ok";
       }
     }
 
@@ -508,7 +491,7 @@
       const token = gitToken.value.trim();
       if (!token) {
         gitState.textContent = "缺 Token";
-        gitState.className = "git-bad";
+        gitState.className = "pill git-bad";
         return;
       }
       if (!manual && !dirtyForGit) return;
@@ -517,7 +500,7 @@
       const path = gitPath.value.trim().replace(/^\/+/, "");
       const api = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}`;
       gitState.textContent = "提交中";
-      gitState.className = "git-warn";
+      gitState.className = "pill git-warn";
       try {
         let sha;
         const getRes = await fetch(api, { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" } });
@@ -531,11 +514,11 @@
         if (!putRes.ok) throw new Error(await putRes.text());
         dirtyForGit = false;
         gitState.textContent = "Git 已同步";
-        gitState.className = "git-ok";
-        lastGit.textContent = new Date().toLocaleTimeString();
+        gitState.className = "pill git-ok";
+        lastGit.textContent = "Git 保存 " + new Date().toLocaleTimeString();
       } catch (error) {
         gitState.textContent = "Git 失败";
-        gitState.className = "git-bad";
+        gitState.className = "pill git-bad";
         output.textContent = "Git 保存失败：\n" + (error.message || error);
       }
     }
@@ -549,10 +532,13 @@
       const cfg = map[mode];
       output.textContent = "Running...";
       runMeta.textContent = "请求 Harness";
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 75000);
       try {
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
           body: JSON.stringify({
             action: "run",
             taskType: cfg.taskType,
@@ -569,9 +555,40 @@
         if (!res.ok) throw new Error(data.error || "请求失败");
         renderAssist(data, mode);
       } catch (error) {
-        output.textContent = "调用失败：\n" + (error.message || error);
+        if (provider.value === "mock") {
+          renderAssist(localMockResult(mode), mode);
+          runMeta.textContent = "本地 Harness · mock";
+          return;
+        }
+        output.textContent = "调用失败：\n" + (error.name === "AbortError" ? "请求超时，稍后重试。" : (error.message || error));
         runMeta.textContent = "失败";
+      } finally {
+        clearTimeout(timeoutId);
       }
+    }
+
+    function localMockResult(mode) {
+      const frameworkName = mode === "review" ? "反AI味检查" : mode === "causality" ? "章节因果链" : "灵感卡";
+      const text = mode === "inspire"
+        ? "# 灵感\n1. 让账纸上出现一个不该在铁炉镇出现的印记。\n2. 老约翰不解释，只把门闩插上。\n3. 刘烬发现少的不是钱，是称重记录。\n4. 对方先赔礼，再试探底线。\n5. 章末停在一声很轻的敲门。"
+        : mode === "causality"
+          ? "# 章节因果链\n上一段：雨停，账纸摊开。\n本段：刘烬必须发现账目缺口。\n下一段：缺口指向称量所或外包账。\n停点：有人来取账。"
+          : "# 反AI味检查\n当前文本短、准，有动作承载。\n风险：如果继续解释“为什么少”，会变成讲道理。\n建议：下一句不要写心理，写一个人进门、一个物件落桌。";
+      return {
+        framework: { name: frameworkName },
+        model: "local-mock",
+        output: text,
+        evaluation: {
+          score: 93,
+          passed: true,
+          gates: [
+            { name: "结构门禁", score: 94, findings: [] },
+            { name: "事实门禁", score: 92, findings: [] },
+            { name: "风格门禁", score: 93, findings: [] },
+            { name: "项目规则门禁", score: 94, findings: [] }
+          ]
+        }
+      };
     }
 
     function renderAssist(data, mode) {
@@ -584,7 +601,6 @@
       output.textContent = text;
       const lines = text.split("\n").filter(line => line.trim()).slice(0, 5);
       ideas.innerHTML = lines.map(line => `<div class="item idea">${escapeHtml(line.replace(/^#+\s*/, ""))}</div>`).join("") || `<div class="item idea">无结果</div>`;
-      focusState.textContent = mode.toUpperCase();
     }
 
     function escapeHtml(value) {
