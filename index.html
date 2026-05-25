@@ -3,175 +3,538 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>文炉 Harness</title>
+  <title>文炉</title>
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;800&family=IBM+Plex+Sans:wght@400;500;700&display=swap");
     :root {
-      --ink: #17202a;
-      --muted: #66717f;
-      --line: #d9dfd8;
-      --paper: #fffefa;
-      --bg: #f6f7f2;
-      --accent: #b5442e;
-      --green: #2f7d58;
-      --danger: #b32635;
+      --ink: #171512;
+      --soft-ink: #5f584e;
+      --faint: #9d9487;
+      --paper: #fffdf6;
+      --paper-deep: #f5efe1;
+      --line: #ded2bd;
+      --charcoal: #211f1a;
+      --accent: #9d2f20;
+      --accent-soft: #f3d8cd;
+      --green: #306a4c;
+      --warn: #a56a00;
+      --danger: #a32626;
+      --shadow: 0 26px 80px rgba(38, 31, 20, .14);
     }
     * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
     body {
       margin: 0;
-      background: var(--bg);
       color: var(--ink);
-      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      background:
+        linear-gradient(90deg, rgba(33,31,26,.035) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(180deg, #e9dfcb, #f7f1e5 42%, #e8dcc6);
+      font: 15px/1.55 "IBM Plex Sans", "Noto Serif SC", sans-serif;
     }
-    .app { display: grid; grid-template-columns: 320px minmax(0, 1fr) 300px; min-height: 100vh; }
-    aside, main { padding: 18px; }
-    .left { background: #17202a; color: #eef4f0; }
-    .right { border-left: 1px solid var(--line); background: #fbfcf8; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .32;
+      background-image: radial-gradient(rgba(40, 34, 24, .18) .7px, transparent .8px);
+      background-size: 7px 7px;
+      mix-blend-mode: multiply;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(210px, 260px) minmax(420px, 1fr) minmax(260px, 340px);
+      min-height: 100vh;
+      gap: 20px;
+      padding: 22px;
+    }
+    .side, .inspector {
+      align-self: start;
+      position: sticky;
+      top: 22px;
+      max-height: calc(100vh - 44px);
+      overflow: auto;
+    }
+    .brand {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      color: #f8f1df;
+      background: var(--charcoal);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+    }
+    .seal {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      color: #fff4e0;
+      background: var(--accent);
+      font: 800 24px/1 "Noto Serif SC", serif;
+      transform: rotate(-4deg);
+    }
     h1, h2, h3, p { margin: 0; }
-    h1 { font-size: 23px; }
-    h2 { font-size: 16px; }
-    .sub { color: #9aa7b1; font-size: 13px; }
-    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-    .mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 8px; background: #d8efe2; color: var(--green); font-weight: 900; }
-    label { display: grid; gap: 6px; margin: 12px 0; color: #4a5968; font-size: 12px; font-weight: 800; }
-    .left label { color: #d7e2dc; }
+    h1 {
+      font: 800 30px/1.05 "Noto Serif SC", serif;
+      letter-spacing: 0;
+    }
+    h2 {
+      font: 800 18px/1.2 "Noto Serif SC", serif;
+    }
+    h3 {
+      font-size: 13px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      color: var(--soft-ink);
+    }
+    .muted { color: var(--faint); font-size: 12px; }
+    .block {
+      margin-top: 14px;
+      padding: 14px;
+      background: rgba(255,253,246,.72);
+      border: 1px solid rgba(122, 103, 72, .25);
+      backdrop-filter: blur(10px);
+    }
+    .block.dark {
+      background: rgba(0,0,0,.16);
+      border-color: rgba(255,255,255,.1);
+    }
+    label {
+      display: grid;
+      gap: 6px;
+      margin-top: 12px;
+      color: var(--soft-ink);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .brand label { color: #d9cfbd; }
     input, select, textarea {
       width: 100%;
-      border: 1px solid #cbd5cf;
-      border-radius: 7px;
-      background: white;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: rgba(255,253,246,.92);
       color: var(--ink);
-      font: inherit;
+      outline: none;
     }
-    input, select { height: 38px; padding: 0 10px; }
-    textarea { min-height: 130px; padding: 10px; resize: vertical; }
-    button {
-      width: 100%;
-      height: 42px;
+    input, select { height: 36px; padding: 0 9px; }
+    textarea { min-height: 96px; padding: 10px; resize: vertical; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(157,47,32,.11);
+    }
+    .writer-wrap {
+      min-height: calc(100vh - 44px);
+      display: grid;
+      grid-template-rows: auto minmax(560px, 1fr) auto;
+      gap: 14px;
+    }
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: end;
+    }
+    .title-input {
+      height: auto;
+      padding: 0;
       border: 0;
-      border-radius: 7px;
-      background: var(--accent);
-      color: white;
-      font-weight: 900;
-      cursor: pointer;
+      background: transparent;
+      font: 800 clamp(28px, 4vw, 56px)/1.08 "Noto Serif SC", serif;
     }
-    button:disabled { opacity: .62; cursor: not-allowed; }
-    .hint { margin-top: 8px; color: #f3d8aa; font-size: 12px; }
-    .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
-    .flow span { padding: 8px; border: 1px solid var(--line); border-radius: 7px; background: white; text-align: center; font-size: 12px; font-weight: 800; }
-    .panel { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); overflow: hidden; box-shadow: 0 14px 36px rgba(23, 32, 42, .08); }
-    .panel + .panel { margin-top: 14px; }
-    .panel h2 { padding: 14px 16px; border-bottom: 1px solid var(--line); }
-    .box { padding: 14px 16px; }
-    .grid, .diff { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    pre { margin: 0; white-space: pre-wrap; overflow: auto; max-height: 560px; font: 13px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .score { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .ring { display: grid; place-items: center; width: 76px; height: 76px; border: 3px solid #d7e4da; border-radius: 50%; color: var(--green); font-size: 24px; font-weight: 900; }
-    .gate { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-    .gate small { display: block; color: var(--muted); }
-    .pass { color: var(--green); }
-    .fail { color: var(--danger); }
-    .finding { border-left: 3px solid var(--accent); padding: 8px 10px; margin-top: 8px; background: white; }
-    .removed { background: #fff0f1; color: #8f1f2a; padding: 10px; }
-    .added { background: #edf8f0; color: #145c3a; padding: 10px; }
-    .history { margin-top: 16px; display: grid; gap: 8px; }
-    .history button { height: auto; min-height: 44px; padding: 9px 10px; background: #263545; color: #dce8e2; text-align: left; }
-    @media (max-width: 980px) {
-      .app, .grid, .diff { grid-template-columns: 1fr; }
-      .right { border-left: 0; border-top: 1px solid var(--line); }
+    .title-input:focus { box-shadow: none; }
+    .status-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .pill {
+      padding: 7px 10px;
+      border: 1px solid rgba(122, 103, 72, .26);
+      background: rgba(255,253,246,.7);
+      color: var(--soft-ink);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .paper {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(157,47,32,.22) 0 1px, transparent 1px) 68px 0 / 1px 100% no-repeat,
+        repeating-linear-gradient(180deg, transparent 0 34px, rgba(80, 66, 45, .13) 35px 36px),
+        var(--paper);
+      border: 1px solid rgba(122, 103, 72, .32);
+      box-shadow: var(--shadow);
+    }
+    .paper::before {
+      content: "文炉";
+      position: absolute;
+      right: 34px;
+      top: 28px;
+      color: rgba(157,47,32,.08);
+      font: 800 88px/1 "Noto Serif SC", serif;
+      writing-mode: vertical-rl;
+      pointer-events: none;
+    }
+    #draft {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      min-height: 100%;
+      height: 100%;
+      padding: 42px 56px 56px 92px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--ink);
+      font: 400 20px/1.8 "Noto Serif SC", serif;
+      letter-spacing: 0;
+      resize: none;
+    }
+    #draft::placeholder { color: #b8ad9b; }
+    .command-row {
+      display: grid;
+      grid-template-columns: 1.2fr repeat(3, minmax(112px, auto));
+      gap: 10px;
+    }
+    .cmd {
+      height: 44px;
+      border: 1px solid var(--charcoal);
+      background: var(--charcoal);
+      color: #fff7e7;
+      font-weight: 800;
+    }
+    .cmd.secondary {
+      background: rgba(255,253,246,.72);
+      color: var(--charcoal);
+    }
+    .cmd.warn {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    .inspector {
+      display: grid;
+      gap: 14px;
+    }
+    .card {
+      padding: 16px;
+      border: 1px solid rgba(122, 103, 72, .28);
+      background: rgba(255,253,246,.78);
+      box-shadow: 0 12px 34px rgba(38,31,20,.08);
+      backdrop-filter: blur(12px);
+    }
+    .meter {
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .score {
+      width: 78px;
+      height: 78px;
+      display: grid;
+      place-items: center;
+      color: var(--green);
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      background: #f7fff9;
+      font-size: 24px;
+      font-weight: 800;
+    }
+    .stack { display: grid; gap: 9px; margin-top: 12px; }
+    .item {
+      padding: 10px;
+      border-left: 3px solid var(--line);
+      background: rgba(255,255,255,.55);
+      color: var(--soft-ink);
+      font-size: 13px;
+    }
+    .item strong { color: var(--ink); }
+    .item.good { border-color: var(--green); }
+    .item.bad { border-color: var(--danger); }
+    .item.idea { border-color: var(--accent); }
+    .output {
+      max-height: 340px;
+      overflow: auto;
+      white-space: pre-wrap;
+      font: 13px/1.68 "Noto Serif SC", serif;
+      color: var(--ink);
+    }
+    .tiny-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+      color: var(--faint);
+      font-size: 12px;
+    }
+    .git-state.ok { color: var(--green); }
+    .git-state.warn { color: var(--warn); }
+    .git-state.bad { color: var(--danger); }
+    @media (max-width: 1100px) {
+      .shell { grid-template-columns: 1fr; }
+      .side, .inspector { position: static; max-height: none; }
+      .command-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .shell { padding: 12px; gap: 12px; }
+      #draft { padding: 34px 24px 46px 34px; font-size: 18px; }
+      .paper { background: repeating-linear-gradient(180deg, transparent 0 33px, rgba(80,66,45,.12) 34px 35px), var(--paper); }
+      .topbar { grid-template-columns: 1fr; }
+      .status-strip { justify-content: flex-start; }
+      .command-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="left">
-      <div class="brand">
-        <div class="mark">文</div>
+  <div class="shell">
+    <aside class="side">
+      <section class="brand">
+        <div class="seal">炉</div>
         <div>
-          <h1>文炉 Harness</h1>
-          <p class="sub">中文长篇创作审稿工作台</p>
+          <h1>文炉</h1>
+          <p class="muted">先写。再审。必要时才叫 AI。</p>
         </div>
-      </div>
-      <label>任务类型
-        <select id="taskType"><option>写章节</option><option>改章节</option><option>审稿</option><option>做设定</option></select>
-      </label>
-      <label>框架
-        <select id="frameworkId">
-          <option value="auto">自动路由</option>
-          <option value="chapter-causality">章节因果链</option>
-          <option value="seven-layer-review">七层叙事检查</option>
-          <option value="anti-ai-style">反AI味检查</option>
-          <option value="state-lock-ledger">状态锁账本</option>
-        </select>
-      </label>
-      <label>Provider
-        <select id="provider">
-          <option value="mock">mock（无密钥演示）</option>
-          <option value="openrouter">OpenRouter</option>
-          <option value="xai">xAI / Grok</option>
-          <option value="deepseek">DeepSeek</option>
-          <option value="openai">OpenAI</option>
-        </select>
-      </label>
-      <label>模型 <input id="model" value="harness-mock-cn"></label>
-      <label>API Key <input id="apiKey" type="password" placeholder="可空；只用于本次请求，不保存"></label>
-      <button id="runBtn">运行 Harness</button>
-      <p class="hint">模型 key 不落库。AI 产物只进候选，不自动覆盖正稿。</p>
-      <div class="history" id="history"></div>
-    </aside>
-    <main>
-      <div class="flow"><span>任务</span><span>框架</span><span>候选</span><span>门禁</span><span>Diff</span></div>
-      <section class="panel">
-        <h2>输入</h2>
-        <div class="box">
-          <label>目标
-            <textarea id="goal">为中文长篇小说生成/审查一个候选段落，要求低 AI 味、强因果、可追溯。</textarea>
+        <div class="block dark">
+          <h3>Git 自动保存</h3>
+          <p class="muted">本机实时保存。填 GitHub token 后，每隔一段时间自动 commit 到私有仓库。</p>
+          <label>Owner <input id="gitOwner" value="zsfd1997-glitch"></label>
+          <label>Repo <input id="gitRepo" value="wenlu-writing-vault"></label>
+          <label>Path <input id="gitPath" value="drafts/current.md"></label>
+          <label>GitHub Token <input id="gitToken" type="password" placeholder="fine-grained token：Contents read/write"></label>
+          <label>自动提交间隔
+            <select id="gitInterval">
+              <option value="0">关闭</option>
+              <option value="60">60 秒</option>
+              <option value="180" selected>3 分钟</option>
+              <option value="300">5 分钟</option>
+            </select>
           </label>
-          <div class="grid">
-            <label>上下文 / 设定 / 禁区
-              <textarea id="contextText">主角当前称谓：刘烬。当前主场锁在铁炉镇及近郊。旧口径资产不得作为依据。AI 产物只能是候选，不能覆盖正稿。</textarea>
-            </label>
-            <label>候选稿 / 待审文本
-              <textarea id="draftText">雨停得很慢。刘烬把账纸摊在炉边，没有急着说话。</textarea>
-            </label>
+          <button class="cmd secondary" id="gitSaveBtn">立即 Git 保存</button>
+          <p class="tiny-row"><span id="gitState" class="git-state warn">Git 未连接</span><span id="lastGit">未提交</span></p>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3>项目上下文</h3>
+        <label>写作目标 <textarea id="goal">写一段低 AI 味、因果明确、能继续推进长篇章节的中文正文。</textarea></label>
+        <label>设定 / 禁区 <textarea id="contextText">主角当前称谓：刘烬。当前主场锁在铁炉镇及近郊。旧口径资产不得作为依据。AI 产物只能是候选，不能覆盖正稿。</textarea></label>
+        <label>模型
+          <select id="provider">
+            <option value="mock">mock（无密钥）</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="xai">xAI / Grok</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="openai">OpenAI</option>
+          </select>
+        </label>
+        <label>模型名 <input id="model" value="harness-mock-cn"></label>
+        <label>模型 API Key <input id="apiKey" type="password" placeholder="只用于本次请求，不保存"></label>
+      </section>
+    </aside>
+
+    <main class="writer-wrap">
+      <header class="topbar">
+        <input id="docTitle" class="title-input" value="未命名章节" aria-label="标题">
+        <div class="status-strip">
+          <span class="pill" id="wordCount">0 字</span>
+          <span class="pill" id="saveState">本机已保存</span>
+          <span class="pill" id="focusState">写作模式</span>
+        </div>
+      </header>
+
+      <section class="paper" aria-label="正文编辑器">
+        <textarea id="draft" spellcheck="false" placeholder="直接写。别先问 AI。&#10;&#10;需要时点右下角：给灵感、查 AI 味、做章节因果。"></textarea>
+      </section>
+
+      <nav class="command-row" aria-label="写作命令">
+        <button class="cmd warn" id="inspireBtn">给我灵感</button>
+        <button class="cmd secondary" id="reviewBtn">查 AI 味</button>
+        <button class="cmd secondary" id="causalityBtn">章节因果</button>
+        <button class="cmd" id="copyBtn">复制正文</button>
+      </nav>
+    </main>
+
+    <aside class="inspector">
+      <section class="card">
+        <h2>灵感卡</h2>
+        <div class="stack" id="ideas">
+          <div class="item idea"><strong>先写到手感断掉。</strong><br>这里不默认打断你。需要时才给参考。</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Harness</h2>
+        <div class="meter">
+          <div class="score" id="score">--</div>
+          <div>
+            <p id="decision">未审稿</p>
+            <p class="muted" id="runMeta">没有调用模型。</p>
           </div>
         </div>
+        <div class="stack" id="gates"></div>
       </section>
-      <section class="panel">
-        <h2>候选输出</h2>
-        <div class="box"><pre id="output">等待运行。</pre></div>
+
+      <section class="card">
+        <h2>参考输出</h2>
+        <pre class="output" id="output">右下角命令会把结果放在这里。正文不会被覆盖。</pre>
       </section>
-      <section class="panel">
-        <h2>Diff 摘要</h2>
-        <div class="box">
-          <p id="diffSummary" class="sub">等待运行。</p>
-          <div class="diff"><pre id="removed" class="removed"></pre><pre id="added" class="added"></pre></div>
-        </div>
-      </section>
-    </main>
-    <aside class="right">
-      <div class="score"><div class="ring" id="score">--</div><div><h3>Harness 门禁</h3><p class="sub" id="decision">未运行</p></div></div>
-      <div id="gates"></div>
-      <div id="findings"></div>
     </aside>
   </div>
+
   <script>
     const endpoint = "https://ybpknmzpxzaiggnmbjqj.supabase.co/functions/v1/wenlu-harness";
     const defaults = { mock: "harness-mock-cn", openrouter: "x-ai/grok-4.1-fast", xai: "grok-4.3", deepseek: "deepseek-chat", openai: "gpt-5.1" };
-    provider.onchange = () => model.value = defaults[provider.value] || "";
-    runBtn.onclick = async () => {
-      runBtn.disabled = true;
-      output.textContent = "运行中...";
+    const storageKey = "wenlu.editor.v2";
+    const fields = ["docTitle", "draft", "goal", "contextText", "provider", "model", "gitOwner", "gitRepo", "gitPath", "gitInterval"];
+    let saveTimer = null;
+    let gitTimer = null;
+    let dirtyForGit = false;
+
+    provider.onchange = () => {
+      model.value = defaults[provider.value] || model.value;
+      queueSave();
+    };
+
+    for (const id of fields) {
+      document.getElementById(id).addEventListener("input", queueSave);
+      document.getElementById(id).addEventListener("change", queueSave);
+    }
+    draft.addEventListener("input", () => {
+      dirtyForGit = true;
+      updateStats();
+    });
+    gitToken.addEventListener("input", () => {
+      sessionStorage.setItem("wenlu.githubToken", gitToken.value);
+      updateGitState();
+    });
+    gitInterval.addEventListener("change", configureGitTimer);
+    inspireBtn.onclick = () => runAssist("inspire");
+    reviewBtn.onclick = () => runAssist("review");
+    causalityBtn.onclick = () => runAssist("causality");
+    copyBtn.onclick = async () => {
+      await navigator.clipboard.writeText(draft.value);
+      copyBtn.textContent = "已复制";
+      setTimeout(() => copyBtn.textContent = "复制正文", 1200);
+    };
+    gitSaveBtn.onclick = () => saveToGit(true);
+
+    function loadState() {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const state = JSON.parse(raw);
+        for (const id of fields) {
+          if (state[id] !== undefined) document.getElementById(id).value = state[id];
+        }
+      }
+      gitToken.value = sessionStorage.getItem("wenlu.githubToken") || "";
+      updateStats();
+      updateGitState();
+      configureGitTimer();
+    }
+
+    function queueSave() {
+      clearTimeout(saveTimer);
+      saveState.textContent = "保存中";
+      saveTimer = setTimeout(saveLocal, 360);
+    }
+
+    function saveLocal() {
+      const state = {};
+      for (const id of fields) state[id] = document.getElementById(id).value;
+      state.savedAt = new Date().toISOString();
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      saveState.textContent = "本机已保存 " + new Date().toLocaleTimeString();
+      updateStats();
+      updateGitState();
+      configureGitTimer();
+    }
+
+    function updateStats() {
+      const count = draft.value.replace(/\s/g, "").length;
+      wordCount.textContent = count + " 字";
+    }
+
+    function updateGitState() {
+      if (!gitToken.value.trim()) {
+        gitState.textContent = "Git 未连接";
+        gitState.className = "git-state warn";
+      } else {
+        gitState.textContent = dirtyForGit ? "Git 待提交" : "Git 已同步";
+        gitState.className = dirtyForGit ? "git-state warn" : "git-state ok";
+      }
+    }
+
+    function configureGitTimer() {
+      clearInterval(gitTimer);
+      const seconds = Number(gitInterval.value);
+      if (seconds > 0) gitTimer = setInterval(() => saveToGit(false), seconds * 1000);
+    }
+
+    function buildMarkdown() {
+      return `# ${docTitle.value || "未命名章节"}\n\n${draft.value}\n\n---\n保存时间：${new Date().toISOString()}\n`;
+    }
+
+    async function saveToGit(manual) {
+      const token = gitToken.value.trim();
+      if (!token) {
+        gitState.textContent = "缺 GitHub Token";
+        gitState.className = "git-state bad";
+        return;
+      }
+      if (!manual && !dirtyForGit) return;
+      const owner = gitOwner.value.trim();
+      const repo = gitRepo.value.trim();
+      const path = gitPath.value.trim().replace(/^\/+/, "");
+      const api = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}`;
+      gitState.textContent = "Git 提交中";
+      gitState.className = "git-state warn";
+      try {
+        let sha;
+        const getRes = await fetch(api, { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" } });
+        if (getRes.ok) sha = (await getRes.json()).sha;
+        const content = btoa(unescape(encodeURIComponent(buildMarkdown())));
+        const putRes = await fetch(api, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "Content-Type": "application/json" },
+          body: JSON.stringify({ message: `autosave: ${docTitle.value || "draft"} ${new Date().toISOString()}`, content, sha })
+        });
+        if (!putRes.ok) throw new Error(await putRes.text());
+        dirtyForGit = false;
+        gitState.textContent = "Git 已同步";
+        gitState.className = "git-state ok";
+        lastGit.textContent = new Date().toLocaleTimeString();
+      } catch (error) {
+        gitState.textContent = "Git 保存失败";
+        gitState.className = "git-state bad";
+        output.textContent = "Git 保存失败：\n" + (error.message || error);
+      }
+    }
+
+    async function runAssist(mode) {
+      const map = {
+        inspire: { taskType: "做设定", frameworkId: "chapter-causality", goal: "基于当前正文，只给 5 条可继续写下去的灵感卡。不要替我写完整正文。" },
+        review: { taskType: "审稿", frameworkId: "anti-ai-style", goal: "检查当前正文的 AI 味、套话、解释性对白和节奏问题。只给可执行修改点。" },
+        causality: { taskType: "写章节", frameworkId: "chapter-causality", goal: "梳理当前正文的上一段触发、本段必须发生、下一段依赖和停点。" }
+      };
+      const cfg = map[mode];
+      output.textContent = "调用中...";
+      runMeta.textContent = "正在请求 Harness";
       try {
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             action: "run",
-            taskType: taskType.value,
-            frameworkId: frameworkId.value,
-            goal: goal.value,
+            taskType: cfg.taskType,
+            frameworkId: cfg.frameworkId,
+            goal: cfg.goal + "\n用户目标：" + goal.value,
             contextText: contextText.value,
-            draftText: draftText.value,
+            draftText: draft.value,
             provider: provider.value,
             model: model.value,
             apiKey: apiKey.value
@@ -179,37 +542,31 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "请求失败");
-        render(data);
-        saveHistory(data);
-      } catch (e) {
-        output.textContent = "失败：" + e.message;
+        renderAssist(data, mode);
+      } catch (error) {
+        output.textContent = "调用失败：\n" + (error.message || error);
+        runMeta.textContent = "调用失败";
       }
-      runBtn.disabled = false;
-    };
-    function render(data) {
-      const evalData = data.evaluation || data.eval;
-      output.textContent = data.output?.content || data.output || "";
-      score.textContent = evalData.score;
-      decision.textContent = evalData.passed ? "PASS，可进入人工 Diff" : "FAIL，禁止合并";
-      decision.className = evalData.passed ? "pass" : "fail";
-      gates.innerHTML = evalData.gates.map(g => '<div class="gate"><div><b>' + g.name + '</b><small>' + (g.findings.length ? g.findings.length + " 个问题" : "无阻断项") + '</small></div><b class="' + (g.score >= 78 ? "pass" : "fail") + '">' + g.score + '</b></div>').join("");
-      findings.innerHTML = evalData.findings.length ? evalData.findings.map(f => '<div class="finding"><b>' + f.severity + '</b> ' + f.message + '</div>').join("") : '<p class="sub">暂无失败项。</p>';
-      diffSummary.textContent = data.diff.summary;
-      removed.textContent = Array.isArray(data.diff.removed) ? data.diff.removed.join("\n") : data.diff.removed;
-      added.textContent = Array.isArray(data.diff.added) ? data.diff.added.join("\n") : data.diff.added;
     }
-    function saveHistory(data) {
-      const evalData = data.evaluation || data.eval;
-      const items = JSON.parse(localStorage.getItem("wenluRuns") || "[]");
-      items.unshift({ score: evalData.score, passed: evalData.passed, goal: goal.value, time: new Date().toLocaleString() });
-      localStorage.setItem("wenluRuns", JSON.stringify(items.slice(0, 8)));
-      drawHistory();
+
+    function renderAssist(data, mode) {
+      const evaluation = data.evaluation || data.eval;
+      const text = data.output?.content || data.output || "";
+      score.textContent = evaluation.score;
+      decision.textContent = evaluation.passed ? "PASS：可参考" : "FAIL：先修问题";
+      runMeta.textContent = `${data.framework?.name || "Harness"} · ${data.model || "model"} · ${new Date().toLocaleTimeString()}`;
+      gates.innerHTML = evaluation.gates.map(g => `<div class="item ${g.score >= 78 ? "good" : "bad"}"><strong>${g.name} ${g.score}</strong><br>${g.findings.length ? g.findings.map(f => f.message).join("；") : "无阻断项"}</div>`).join("");
+      output.textContent = text;
+      const lines = text.split("\n").filter(line => line.trim()).slice(0, 5);
+      ideas.innerHTML = lines.map(line => `<div class="item idea">${escapeHtml(line.replace(/^#+\s*/, ""))}</div>`).join("") || `<div class="item idea">没有可展示的灵感卡。</div>`;
+      focusState.textContent = mode === "inspire" ? "灵感模式" : mode === "review" ? "审稿模式" : "因果模式";
     }
-    function drawHistory() {
-      const items = JSON.parse(localStorage.getItem("wenluRuns") || "[]");
-      history.innerHTML = items.length ? "<p class='sub'>本机历史</p>" + items.map(i => '<button type="button">' + (i.passed ? "PASS" : "FAIL") + " · " + i.score + " · " + i.time + "<br>" + i.goal.slice(0, 42) + "</button>").join("") : "";
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
     }
-    drawHistory();
+
+    loadState();
   </script>
 </body>
 </html>
