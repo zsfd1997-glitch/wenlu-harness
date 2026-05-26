@@ -474,6 +474,7 @@
       for (const id of fields) state[id] = document.getElementById(id).value;
       state.savedAt = new Date().toISOString();
       localStorage.setItem(storageKey, JSON.stringify(state));
+      if (draft.value.trim()) localStorage.setItem(`${storageKey}.backup`, JSON.stringify(state));
       saveState.textContent = "已保存 " + new Date().toLocaleTimeString();
       updateStats();
       updateGitState();
@@ -509,6 +510,7 @@
     }
 
     function downloadMarkdown() {
+      saveLocal();
       const blob = new Blob([buildMarkdown()], { type: "text/markdown;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -520,6 +522,7 @@
 
     function newDraft() {
       if (draft.value.trim() && !confirm("清空当前正文？")) return;
+      saveLocal();
       docTitle.value = "未命名章节";
       draft.value = "";
       score.textContent = "--";
